@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+*.pyc
+crp_raw_data.csv
+crp_data_wide.xlsx
+crp_over_time.png
+individual_patient_plots.png
+crp_analysis_results.txt
+crp_analysis_results.md
