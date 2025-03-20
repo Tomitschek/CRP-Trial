@@ -330,6 +330,9 @@ Nach dem Ausführen des Skripts werden mehrere Ausgaben erstellt:
 - `crp_boxplot.png`: Boxplot-Darstellung der CRP-Werte nach Tag und Gruppe
 - `crp_over_time_by_group.png`: Detaillierte Darstellung mit Standardfehler und p-Werten
 
+## Beispiel output
+einen kompletten Beispieloutput findet sich unter ./example
+
 ## Projektstruktur
 
 Dieses Projekt ist als Python-Paket organisiert, um die Wartbarkeit, Erweiterbarkeit und Wiederverwendbarkeit zu verbessern.
@@ -359,6 +362,7 @@ CRP-Trial/
 │   │   └── io.py               # Datei-I/O-Operationen
 │   │
 │   └── cli.py                  # Befehlszeilenschnittstelle
+├── example                     # Beispiel output
 │
 └── output/                     # Ausgabeverzeichnis (gitignoriert)
     ├── crp_raw_data.csv        # Rohdaten im CSV-Format

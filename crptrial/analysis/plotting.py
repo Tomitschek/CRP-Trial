@@ -49,11 +49,21 @@ def create_exploratory_plots(df, output_dir):
 
     # Boxplot of CRP values by day and group
     plt.figure(figsize=(12, 8))
-    sns.boxplot(data=df, x='day', y='crp', hue='group')
+    
+    # Create the boxplot and get the legend handles and labels
+    ax = sns.boxplot(data=df, x='day', y='crp', hue='group')
+    handles, labels = ax.get_legend_handles_labels()
+    
+    # Map the group names to German labels
+    group_labels = {'control': 'Kontrolle', 'treated': 'Behandelt'}
+    german_labels = [group_labels.get(label, label) for label in labels]
+    
+    # Update the legend with correct mapping
+    plt.legend(handles, german_labels, title='Gruppe')
+    
     plt.title('CRP-Werte nach Tag und Gruppe')
     plt.xlabel('Tag nach Operation')
     plt.ylabel('CRP-Wert (mg/L)')
-    plt.legend(title='Gruppe', labels=['Kontrolle', 'Behandelt'])
     boxplot_path = os.path.join(output_dir, 'crp_boxplot.png')
     plt.savefig(boxplot_path)
     plt.close()
