@@ -15,6 +15,7 @@ def generate_patient_id():
 def generate_crp_data(n_per_group=20, baseline_mean=5, baseline_sd=2, 
                      peak_treated=150, peak_control=180,
                      decay_treated=0.5, decay_control=0.3,
+                     day_effects={3: 15, 4: 25, 5: 35, 6: 30, 7: 20},
                      random_seed=42):
     """
     Generate synthetic CRP data for two groups over 8 days (0-7)
@@ -29,6 +30,10 @@ def generate_crp_data(n_per_group=20, baseline_mean=5, baseline_sd=2,
         Peak CRP values for treated and control groups
     decay_treated, decay_control : float
         Decay rate of CRP after peak for each group
+    day_effects : dict
+        Dictionary mapping days to effect sizes. Positive values mean treatment
+        group has lower CRP values on that day. Default creates significant
+        differences increasing from day 3 to day 5, then slightly decreasing.
     random_seed : int
         Random seed for reproducibility
     
@@ -39,6 +44,14 @@ def generate_crp_data(n_per_group=20, baseline_mean=5, baseline_sd=2,
         - group: treatment group (treated/control)
         - day: day of measurement (0-7)
         - crp: CRP value
+    
+    Examples:
+    ---------
+    # To create dataset with huge difference on day 5 only:
+    df = generate_crp_data(day_effects={5: 50})
+    
+    # To create dataset with increasing treatment effect:
+    df = generate_crp_data(day_effects={3: 10, 4: 20, 5: 30, 6: 40, 7: 50})
     """
     np.random.seed(random_seed)
     
@@ -58,7 +71,7 @@ def generate_crp_data(n_per_group=20, baseline_mean=5, baseline_sd=2,
         return 0.5 + np.random.exponential(0.5)  # Random value between 0.5 and ~2.0
     
     # Generate data for each patient
-    for idx, patient in enumerate(patient_ids):  # Changed from range to enumerate
+    for idx, patient in enumerate(patient_ids):
         # Determine group
         is_treated = idx < n_per_group
         group = 'treated' if is_treated else 'control'
@@ -87,18 +100,18 @@ def generate_crp_data(n_per_group=20, baseline_mean=5, baseline_sd=2,
                 
                 crp += individual_variation
             
-            # Adjust group differences
-            if day >= 3:
-                effect_size = 6  # Further reduced effect size
-                random_effect = np.random.normal(0, 8)  # Increased random variation in effect
+            # Apply day-specific treatment effects
+            if day in day_effects and day_effects[day] > 0:
+                effect_size = day_effects[day]
+                random_effect = np.random.normal(0, effect_size * 0.3)  # Some randomness in effect
                 if is_treated:
                     crp -= effect_size + random_effect
                 else:
-                    crp += effect_size + random_effect
+                    crp += random_effect
             
             # Store the data point with randomized minimum CRP and round to 2 decimal places
             all_data.append({
-                'patient_id': patient,  # Using the generated ID instead of index
+                'patient_id': patient,
                 'group': group,
                 'day': day,
                 'crp': round(max(get_min_crp(), crp), 2)  # Round to 2 decimal places
@@ -230,8 +243,14 @@ def save_excel_format(df, filename="crp_data_wide.xlsx"):
     wide_df = wide_df.sort_values(['group', 'patient_id'])
     
     # Save to Excel
-    wide_df.to_excel(filename, index=False)
-    print(f"Wide format data saved to {filename}")
+    try:
+        wide_df.to_excel(filename, index=False)
+        print(f"Wide format data saved to {filename}")
+    except ImportError:
+        print(f"Warning: openpyxl not installed. Cannot save Excel file.")
+        print(f"Installing with: pip install openpyxl")
+        print(f"Saving as CSV instead: {filename.replace('.xlsx', '.csv')}")
+        wide_df.to_csv(filename.replace('.xlsx', '.csv'), index=False)
     
     return wide_df
 
@@ -239,8 +258,13 @@ if __name__ == "__main__":
     # Set random seed for reproducibility
     np.random.seed(42)
     
-    # Generate data
-    df = generate_crp_data(n_per_group=20)
+    # Generate data with default day effects
+    # df = generate_crp_data()
+    
+    # Examples of different day effect patterns:
+    df = generate_crp_data(day_effects={5: 50})  # Big effect on day 5 only
+    # df = generate_crp_data(day_effects={3: 10, 4: 20, 5: 30, 6: 40, 7: 50})  # Increasing effect
+    # df = generate_crp_data(day_effects={})  # No treatment effect at all
     
     # Save raw data
     save_crp_data(df, "crp_raw_data.csv")
@@ -259,5 +283,6 @@ if __name__ == "__main__":
     print(t_test_results)
     
     # Create and show plot
-    plot_results(df, t_test_results)
+    plt_obj = plot_results(df, t_test_results)
+    plt_obj.savefig('crp_over_time_by_group.png')
     plt.show()

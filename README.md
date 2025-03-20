@@ -192,3 +192,8 @@ Die Analyse klinischer Zeitreihen erfordert sorgfältige Berücksichtigung sowoh
 - Klarer Kommunikation der Ergebnisse
 
 Denken Sie daran, dass das Ziel nicht nur statistische Signifikanz ist, sondern bedeutsame klinische Erkenntnisse, die die Patientenversorgung verbessern können.
+
+
+# get started: 
+- c:\Users\muelltho\git-rpositories\CRP-Trial\venv\Scripts\activate.bat
+-

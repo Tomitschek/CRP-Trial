@@ -80,10 +80,8 @@ def time_to_normalize(group):
 def render_to_markdown(results, output_filepath):
     with open(output_filepath, 'w', encoding='utf-8') as f:
         f.write("# CRP-Datenanalyse-Ergebnisse\n")
-        f.write("\n## Datenübersicht:\n")
-        f.write("```\n")
-        f.write(results["info_str"])
-        f.write("```\n")
+        # f.write("\n## Datenübersicht:\n")
+        # f.write(f"```\n{results['info_str']}\n```\n")      
         f.write("\n## Zusammenfassende Statistiken:\n")
         f.write(results["summary_stats"].to_markdown())
         f.write("\n## Deskriptive Statistiken nach Gruppe und Tag:\n")
