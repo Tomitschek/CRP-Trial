@@ -289,7 +289,6 @@ Erzeugt Daten mit einem ansteigenden und dann abnehmenden Behandlungseffekt.
 python run.py --generate --day-effects "{}"
 ```
 
-
 Erzeugt Daten ohne Unterschied zwischen den Gruppen.
 
 4. **Vorhandene Daten aus einer bestimmten Datei analysieren:**
@@ -304,7 +303,6 @@ Analysiert die Daten aus der angegebenen Datei ohne neue Daten zu generieren.
 
 ```
 python run.py --generate --day-effects "{4: 30, 5: 40}" --output-md ergebnisse/analyse.md --output-excel daten/final_data.xlsx
-
 ```
 
 Erzeugt Daten mit Effekten an Tag 4 und 5, und speichert die Ergebnisse in benutzerdefinierten Verzeichnissen.
@@ -331,3 +329,39 @@ Nach dem Ausführen des Skripts werden mehrere Ausgaben erstellt:
 - `individual_patient_plots.png`: Individuelle Verläufe für jeden Patienten
 - `crp_boxplot.png`: Boxplot-Darstellung der CRP-Werte nach Tag und Gruppe
 - `crp_over_time_by_group.png`: Detaillierte Darstellung mit Standardfehler und p-Werten
+
+## Projektstruktur
+
+Dieses Projekt ist als Python-Paket organisiert, um die Wartbarkeit, Erweiterbarkeit und Wiederverwendbarkeit zu verbessern.
+
+CRP-Trial/
+├── README.md                   # Diese Dokumentation
+├── requirements.txt            # Python-Abhängigkeiten
+├── setup.py                    # Paket-Setup für pip-Installation
+├── .gitignore                  # Ignorierte Dateien für Git
+├── run.py                      # Haupteinstiegspunkt zum Ausführen der Analyse
+│
+├── crptrial/                   # Hauptpaketverzeichnis
+│   ├── __init__.py             # Paketinitialisierung
+│   │
+│   ├── generate/               # Code für die Datengenerierung
+│   │   ├── __init__.py
+│   │   └── generator.py        # Funktionen zur Erzeugung synthetischer Daten
+│   │
+│   ├── analysis/               # Analysemodule
+│   │   ├── __init__.py
+│   │   ├── stats.py            # Statistische Analysefunktionen
+│   │   ├── plotting.py         # Funktionen für die Datenvisualisierung
+│   │   └── reporting.py        # Funktionen für die Berichterstellung
+│   │
+│   ├── utils/                  # Hilfsfunktionen
+│   │   ├── __init__.py
+│   │   └── io.py               # Datei-I/O-Operationen
+│   │
+│   └── cli.py                  # Befehlszeilenschnittstelle
+│
+└── output/                     # Ausgabeverzeichnis (gitignoriert)
+    ├── crp_raw_data.csv        # Rohdaten im CSV-Format
+    ├── crp_data_wide.xlsx      # Daten im breiten Format (Excel)
+    ├── crp_analysis_results.md # Ergebnisbericht im Markdown-Format
+    └── *.png                   # Generierte Abbildungen

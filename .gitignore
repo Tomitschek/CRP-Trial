@@ -1,7 +1,37 @@
+# Virtual environments and Python cache
 venv/
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Output directories and files
 output/
+
+# Editor specific files
+.vscode/
+.idea/
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
 src/__pycache__/
 crp_raw_data.csv
 crp_data_wide.xlsx

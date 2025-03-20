@@ -1,23 +1,21 @@
-import matplotlib.pyplot as plt
-import argparse
+"""
+Command-line interface for CRP-Trial
+"""
 import os
-import sys
+import argparse
 
-# Add the parent directory to sys.path to enable imports from src
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from src.generate import generate_crp_data, save_crp_data, save_excel_format
-from src.analyse import load_data, analyze_data, analyze_crp_data, plot_results, render_to_markdown
+from crptrial.generate import generate_crp_data
+from crptrial.utils.io import load_data, save_crp_data, save_excel_format
+from crptrial.analysis.stats import analyze_data, analyze_crp_data
+from crptrial.analysis.plotting import create_exploratory_plots, plot_results
+from crptrial.analysis.reporting import render_to_markdown
 
 def main():
     """
     Main function to execute CRP data generation, analysis, and visualization
     """
-    # Get root path and output path
-    root_dir = os.path.dirname(os.path.dirname(__file__))
-    output_dir = os.path.join(root_dir, 'output')
-    
     # Create output directory if it doesn't exist
+    output_dir = os.path.join(os.getcwd(), 'output')
     os.makedirs(output_dir, exist_ok=True)
     
     parser = argparse.ArgumentParser(description='CRP Data Analysis Tool')
@@ -51,6 +49,10 @@ def main():
     df = load_data(args.input_file)
     print(f"Loaded CRP data from {args.input_file}")
     
+    # Create exploratory plots
+    print("Creating exploratory plots...")
+    plot_paths = create_exploratory_plots(df, output_dir)
+    
     # Analyze data
     print("Analyzing data...")
     results = analyze_data(df)
@@ -63,15 +65,13 @@ def main():
     print("\nT-test Results at Each Time Point:")
     print(t_test_results)
     
+    # Create results plot
+    print("Creating results plot...")
+    results_plot_path = plot_results(df, t_test_results, output_dir)
+    
     # Render Markdown results
     render_to_markdown(results, args.output_md)
     print(f"Analysis results saved to {args.output_md}")
-    
-    # Create and show plot
-    print("Generating plots...")
-    plt_obj = plot_results(df, t_test_results)
-    plt_obj.savefig(os.path.join(output_dir, 'crp_over_time_by_group.png'))
-    print("Plots saved")
     
     print("Analysis complete!")
 
