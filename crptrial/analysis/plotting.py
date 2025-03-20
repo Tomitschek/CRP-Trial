@@ -86,7 +86,8 @@ def plot_results(df, t_test_results, output_dir):
     plt.figure(figsize=(10, 6))
     
     # Calculate means, standard errors, and standard deviations for each group at each time point
-    summary = df.groupby(['day', 'group'])['crp'].agg(['mean', 'sem', 'std']).reset_index()
+    # Fix FutureWarning by explicitly setting observed=True
+    summary = df.groupby(['day', 'group'], observed=True)['crp'].agg(['mean', 'sem', 'std']).reset_index()
     
     # Plot each group
     for group in ['treated', 'control']:

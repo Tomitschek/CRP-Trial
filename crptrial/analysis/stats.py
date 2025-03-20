@@ -54,6 +54,13 @@ def analyze_data(df):
 
     model = mixedlm("crp ~ group + day", data=df, groups="patient_id")
     results = model.fit(method='nm')  # Use Nelder-Mead optimizer
+    # Use LBFGS optimizer directly instead of waiting for nm to fail
+    mixed_model_summary = results.summary().tables[1]
+        results = model.fit(method='lbfgs', maxiter=100)
+    except:
+        # Fall back to nm if lbfgs fails
+        print("Warning: LBFGS optimizer failed, falling back to Nelder-Mead")
+        results = model.fit(method='nm')
 
     mixed_model_summary = results.summary().tables[1]
     mixed_model_df = pd.read_html(io.StringIO(mixed_model_summary.to_html()), header=0, index_col=0)[0]
@@ -100,25 +107,31 @@ def analyze_crp_data(df):
     --------
     tuple: (mixed model results, t-test results DataFrame)
     """
-    # Fit mixed linear model
+    # Fit mixed linear model# Use LBFGS optimizer with increased iterations
     model = MixedLM.from_formula(
-        "crp ~ group + day + group:day",
+        "crp ~ group + day + group:day",ults = model.fit(method='lbfgs', maxiter=200)
         groups="patient_id",
-        data=df
+        data=df failed, falling back to Nelder-Mead")
     )
     mixed_model_results = model.fit()
-    
+    rform t-tests at each time point
     # Perform t-tests at each time point
-    t_test_results = []
     for day in sorted(df['day'].unique()):
-        day_data = df[df['day'] == day]
-        treated = day_data[day_data['group'] == 'treated']['crp']
-        control = day_data[day_data['group'] == 'control']['crp']
-        
+        day_data = df[df['day'] == day]f['day'].unique()):
+        treated = day_data[day_data['group'] == 'treated']['crp']'] == day]
+        control = day_data[day_data['group'] == 'control']['crp']] == 'treated']['crp']
+        '] == 'control']['crp']
         t_stat, p_val = stats.ttest_ind(treated, control)
-        t_test_results.append({
+        t_test_results.append({    t_stat, p_val = stats.ttest_ind(treated, control)
             'day': day,
-            'p_value': p_val,
+            'p_value': p_val,            'day': day,
+
+
+
+
+
+
+    return mixed_model_results, pd.DataFrame(t_test_results)            })            'control_mean': control.mean()            'treated_mean': treated.mean(),            'p_value': p_val,
             'treated_mean': treated.mean(),
             'control_mean': control.mean()
         })
