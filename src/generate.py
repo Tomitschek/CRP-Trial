@@ -1,12 +1,17 @@
 # Ensure you have the required package installed:
-# pip install statsmodels
+# pip install statsmodels pandas numpy
 
 import numpy as np
 import pandas as pd
-import statsmodels.api as sm
-from scipy import stats
-import matplotlib.pyplot as plt
-from statsmodels.regression.mixed_linear_model import MixedLM
+import os
+import sys
+
+# Add the parent directory to sys.path to enable imports from src
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+# Create output directory if it doesn't exist
+output_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'output')
+os.makedirs(output_dir, exist_ok=True)
 
 def generate_patient_id():
     """Generate a random 8-digit ID starting with 64"""
@@ -121,87 +126,7 @@ def generate_crp_data(n_per_group=20, baseline_mean=5, baseline_sd=2,
     df = pd.DataFrame(all_data)
     return df
 
-def analyze_crp_data(df):
-    """
-    Analyze CRP data using a linear mixed model and t-tests at each time point
-    
-    Parameters:
-    -----------
-    df : pandas.DataFrame
-        DataFrame with columns: patient_id, group, day, crp
-    
-    Returns:
-    --------
-    tuple: (mixed model results, t-test results DataFrame)
-    """
-    # Fit mixed linear model
-    model = MixedLM.from_formula(
-        "crp ~ group + day + group:day",
-        groups="patient_id",
-        data=df
-    )
-    mixed_model_results = model.fit()
-    
-    # Perform t-tests at each time point
-    t_test_results = []
-    for day in sorted(df['day'].unique()):
-        day_data = df[df['day'] == day]
-        treated = day_data[day_data['group'] == 'treated']['crp']
-        control = day_data[day_data['group'] == 'control']['crp']
-        
-        t_stat, p_val = stats.ttest_ind(treated, control)
-        t_test_results.append({
-            'day': day,
-            'p_value': p_val,
-            'treated_mean': treated.mean(),
-            'control_mean': control.mean()
-        })
-    
-    return mixed_model_results, pd.DataFrame(t_test_results)
-
-def plot_results(df, t_test_results):
-    """
-    Create a plot showing CRP trajectories for both groups, including SD as shaded area and p-values
-    
-    Parameters:
-    -----------
-    df : pandas.DataFrame
-        DataFrame with columns: patient_id, group, day, crp
-    t_test_results : pandas.DataFrame
-        DataFrame with columns: day, p_value, treated_mean, control_mean
-    """
-    plt.figure(figsize=(10, 6))
-    
-    # Calculate means, standard errors, and standard deviations for each group at each time point
-    summary = df.groupby(['day', 'group'])['crp'].agg(['mean', 'sem', 'std']).reset_index()
-    
-    # Plot each group
-    for group in ['treated', 'control']:
-        group_data = summary[summary['group'] == group]
-        plt.errorbar(group_data['day'], group_data['mean'], 
-                     yerr=group_data['sem'], 
-                     label=f"{group.capitalize()} (Mean ± SEM)",
-                     marker='o')
-        
-        # Plot SD as shaded area
-        plt.fill_between(group_data['day'], 
-                         group_data['mean'] - group_data['std'], 
-                         group_data['mean'] + group_data['std'], 
-                         alpha=0.2)
-    
-    # Annotate with p-values
-    for _, row in t_test_results.iterrows():
-        plt.annotate(f"p={row['p_value']:.3f}", (row['day'], max(row['treated_mean'], row['control_mean'])), textcoords="offset points", xytext=(0,-15), ha='center', color='red')
-    
-    plt.xlabel('Days after surgery')
-    plt.ylabel('CRP (mg/L)')
-    plt.title('CRP Levels Over Time by Treatment Group')
-    plt.legend()
-    plt.grid(True, alpha=0.3)
-    
-    return plt
-
-def save_crp_data(df, filename="crp_data.csv"):
+def save_crp_data(df, filename="crp_raw_data.csv"):
     """
     Save the CRP data to a CSV file
     
@@ -212,6 +137,9 @@ def save_crp_data(df, filename="crp_data.csv"):
     filename : str
         Name of the file to save the data to
     """
+    # Make sure directory exists
+    os.makedirs(os.path.dirname(filename) or '.', exist_ok=True)
+    
     # Round CRP values before saving
     df['crp'] = df['crp'].round(2)
     df.to_csv(filename, index=False)
@@ -229,6 +157,9 @@ def save_excel_format(df, filename="crp_data_wide.xlsx"):
     filename : str
         Name of the Excel file to save
     """
+    # Make sure directory exists
+    os.makedirs(os.path.dirname(filename) or '.', exist_ok=True)
+    
     # Round CRP values before pivoting
     df = df.copy()
     df['crp'] = df['crp'].round(2)
@@ -247,42 +178,9 @@ def save_excel_format(df, filename="crp_data_wide.xlsx"):
         wide_df.to_excel(filename, index=False)
         print(f"Wide format data saved to {filename}")
     except ImportError:
+        csv_filename = filename.replace('.xlsx', '.csv')
         print(f"Warning: openpyxl not installed. Cannot save Excel file.")
-        print(f"Installing with: pip install openpyxl")
-        print(f"Saving as CSV instead: {filename.replace('.xlsx', '.csv')}")
-        wide_df.to_csv(filename.replace('.xlsx', '.csv'), index=False)
+        print(f"Saving as CSV instead: {csv_filename}")
+        wide_df.to_csv(csv_filename, index=False)
     
     return wide_df
-
-if __name__ == "__main__":
-    # Set random seed for reproducibility
-    np.random.seed(42)
-    
-    # Generate data with default day effects
-    # df = generate_crp_data()
-    
-    # Examples of different day effect patterns:
-    df = generate_crp_data(day_effects={5: 50})  # Big effect on day 5 only
-    # df = generate_crp_data(day_effects={3: 10, 4: 20, 5: 30, 6: 40, 7: 50})  # Increasing effect
-    # df = generate_crp_data(day_effects={})  # No treatment effect at all
-    
-    # Save raw data
-    save_crp_data(df, "crp_raw_data.csv")
-    
-    # Save Excel format
-    save_excel_format(df, "crp_data_wide.xlsx")
-    
-    # Analyze and plot
-    mixed_results, t_test_results = analyze_crp_data(df)
-    
-    # Print results
-    print("\nMixed Model Results:")
-    print(mixed_results.summary())
-    
-    print("\nT-test Results at Each Time Point:")
-    print(t_test_results)
-    
-    # Create and show plot
-    plt_obj = plot_results(df, t_test_results)
-    plt_obj.savefig('crp_over_time_by_group.png')
-    plt.show()

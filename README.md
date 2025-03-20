@@ -193,7 +193,141 @@ Die Analyse klinischer Zeitreihen erfordert sorgfältige Berücksichtigung sowoh
 
 Denken Sie daran, dass das Ziel nicht nur statistische Signifikanz ist, sondern bedeutsame klinische Erkenntnisse, die die Patientenversorgung verbessern können.
 
+## Bedienungsanleitung
 
-# get started: 
-- c:\Users\muelltho\git-rpositories\CRP-Trial\venv\Scripts\activate.bat
--
+### Installation und Einrichtung
+
+1. **Virtuelle Umgebung aktivieren:**
+   ```
+   # Windows:
+   c:\Users\muelltho\git-rpositories\CRP-Trial\venv\Scripts\activate.bat
+   
+   # PowerShell:
+   c:\Users\muelltho\git-rpositories\CRP-Trial\venv\Scripts\Activate.ps1
+   
+   # Linux/macOS:
+   source c:/Users/muelltho/git-rpositories/CRP-Trial/venv/bin/activate
+   ```
+
+2. **Abhängigkeiten installieren:**
+   ```
+   pip install -r requirements.txt
+   ```
+
+### Anwendung
+
+Das Tool besteht aus drei Hauptkomponenten im `src` Verzeichnis:
+- `generate.py` - Erzeugt synthetische CRP-Daten
+- `analyse.py` - Analysiert die Daten und erstellt Visualisierungen
+- `main.py` - Benutzerfreundliche Schnittstelle für den gesamten Workflow
+
+#### Ausführung
+
+Verwenden Sie das `run.py` Skript im Hauptverzeichnis:
+
+```
+python run.py [Optionen]
+```
+
+#### Detaillierte Beschreibung der Parameter
+
+* `--generate`
+  - Beschreibung: Erzeugt einen neuen Datensatz mit synthetischen CRP-Daten
+  - Typ: Flag (ohne Wertangabe)
+  - Standard: Nicht gesetzt (es werden keine neuen Daten erzeugt)
+  - Beispiel: `python run.py --generate`
+
+* `--day-effects`
+  - Beschreibung: Definiert die Größe der Behandlungseffekte für bestimmte Tage als Python-Dictionary
+  - Typ: String (Python-Dictionary-Format)
+  - Standard: `"{5: 50}"` (starker Effekt an Tag 5)
+  - Format: `"{Tag1: Effektgröße1, Tag2: Effektgröße2, ...}"`
+  - Hinweis: Positive Werte bedeuten niedrigere CRP-Werte in der Behandlungsgruppe
+  - Beispiele:
+    - `--day-effects "{5: 50}"` - Starker Effekt (50 Einheiten) nur an Tag 5
+    - `--day-effects "{}"` - Kein Behandlungseffekt
+    - `--day-effects "{3: 10, 4: 20, 5: 30, 6: 40, 7: 50}"` - Ansteigender Behandlungseffekt
+
+* `--input-file`
+  - Beschreibung: Pfad zur Eingabedatei mit CRP-Daten im CSV-Format
+  - Typ: String (Dateipfad)
+  - Standard: `output/crp_raw_data.csv`
+  - Beispiel: `--input-file meine_daten.csv`
+
+* `--output-md`
+  - Beschreibung: Pfad zur Ausgabedatei für die Analyseergebnisse im Markdown-Format
+  - Typ: String (Dateipfad)
+  - Standard: `output/crp_analysis_results.md`
+  - Beispiel: `--output-md output/meine_ergebnisse.md`
+
+* `--output-excel`
+  - Beschreibung: Pfad zur Excel-Ausgabedatei mit den Daten im breiten Format (eine Zeile pro Patient)
+  - Typ: String (Dateipfad)
+  - Standard: `output/crp_data_wide.xlsx`
+  - Beispiel: `--output-excel output/meine_daten.xlsx`
+
+#### Beispiele für typische Anwendungsfälle
+
+1. **Neue Daten erzeugen mit Standardeinstellungen:**
+
+```
+python run.py --generate
+```
+Erzeugt einen neuen Datensatz mit einem starken Behandlungseffekt an Tag 5 und speichert ihn als `output/crp_raw_data.csv`.
+
+2. **Neue Daten mit spezifischem Behandlungseffektmuster erzeugen:**
+
+```
+python run.py --generate --day-effects "{3: 10, 4: 20, 5: 30, 6: 20, 7: 10}"
+```
+
+Erzeugt Daten mit einem ansteigenden und dann abnehmenden Behandlungseffekt.
+
+3. **Neue Daten ohne Behandlungseffekt erzeugen (für Nullhypothese):**
+
+```
+python run.py --generate --day-effects "{}"
+```
+
+
+Erzeugt Daten ohne Unterschied zwischen den Gruppen.
+
+4. **Vorhandene Daten aus einer bestimmten Datei analysieren:**
+
+```
+python run.py --input-file meine_crp_daten.csv
+```
+
+Analysiert die Daten aus der angegebenen Datei ohne neue Daten zu generieren.
+
+5. **Vollständiger Workflow mit benutzerdefinierten Dateipfaden:**
+
+```
+python run.py --generate --day-effects "{4: 30, 5: 40}" --output-md ergebnisse/analyse.md --output-excel daten/final_data.xlsx
+
+```
+
+Erzeugt Daten mit Effekten an Tag 4 und 5, und speichert die Ergebnisse in benutzerdefinierten Verzeichnissen.
+
+#### Interpretieren der Ergebnisse
+
+Nach dem Ausführen des Skripts werden mehrere Ausgaben erstellt:
+
+1. **CSV-Datei mit Rohdaten**: Enthält die CRP-Werte für jeden Patienten an jedem Tag im langen Format.
+
+2. **Excel-Datei mit Daten im breiten Format**: Ein Patient pro Zeile, mit Spalten für jeden Tag.
+
+3. **Markdown-Bericht**: Enthält:
+- Zusammenfassende Statistiken
+- Deskriptive Statistiken nach Gruppe und Tag
+- Ergebnisse des linearen gemischten Modells
+- T-Test-Ergebnisse für maximale CRP-Werte
+- Analyse der Zeit bis zur CRP-Normalisierung
+- Fazit und Einschränkungen
+- Grafiken
+
+4. **Visualisierungen**:
+- `crp_over_time.png`: Verlauf der CRP-Werte nach Gruppe
+- `individual_patient_plots.png`: Individuelle Verläufe für jeden Patienten
+- `crp_boxplot.png`: Boxplot-Darstellung der CRP-Werte nach Tag und Gruppe
+- `crp_over_time_by_group.png`: Detaillierte Darstellung mit Standardfehler und p-Werten

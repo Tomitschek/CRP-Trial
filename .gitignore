@@ -1,6 +1,8 @@
 venv/
 __pycache__/
 *.pyc
+output/
+src/__pycache__/
 crp_raw_data.csv
 crp_data_wide.xlsx
 crp_over_time.png
