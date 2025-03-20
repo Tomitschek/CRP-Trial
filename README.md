@@ -333,7 +333,7 @@ Nach dem Ausführen des Skripts werden mehrere Ausgaben erstellt:
 ## Projektstruktur
 
 Dieses Projekt ist als Python-Paket organisiert, um die Wartbarkeit, Erweiterbarkeit und Wiederverwendbarkeit zu verbessern.
-
+```
 CRP-Trial/
 ├── README.md                   # Diese Dokumentation
 ├── requirements.txt            # Python-Abhängigkeiten
@@ -365,3 +365,4 @@ CRP-Trial/
     ├── crp_data_wide.xlsx      # Daten im breiten Format (Excel)
     ├── crp_analysis_results.md # Ergebnisbericht im Markdown-Format
     └── *.png                   # Generierte Abbildungen
+```
