@@ -200,13 +200,13 @@ Denken Sie daran, dass das Ziel nicht nur statistische Signifikanz ist, sondern 
 1. **Virtuelle Umgebung aktivieren:**
    ```
    # Windows:
-   c:\Users\muelltho\git-rpositories\CRP-Trial\venv\Scripts\activate.bat
+   c:\User\CRP-Trial\venv\Scripts\activate.bat
    
    # PowerShell:
-   c:\Users\muelltho\git-rpositories\CRP-Trial\venv\Scripts\Activate.ps1
+   c:\Users\CRP-Trial\venv\Scripts\Activate.ps1
    
    # Linux/macOS:
-   source c:/Users/muelltho/git-rpositories/CRP-Trial/venv/bin/activate
+   source c:/User/CRP-Trial/venv/bin/activate
    ```
 
 2. **Abhängigkeiten installieren:**

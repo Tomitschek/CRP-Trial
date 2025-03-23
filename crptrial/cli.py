@@ -30,7 +30,11 @@ def main():
                         help='Output Excel file for wide format')
     args = parser.parse_args()
 
-    if args.generate:
+    # Check if input file exists and generate data if needed
+    if args.generate or not os.path.exists(args.input_file):
+        if not args.generate:
+            print(f"Input file '{args.input_file}' not found. Generating sample data...")
+        
         try:
             # Parse day_effects from string to dictionary
             day_effects = eval(args.day_effects)
